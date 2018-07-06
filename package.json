@@ -1,0 +1,23 @@
+{
+  "name": "fbintegration",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "apiai": "^4.0.3",
+    "cfenv": "^1.1.0",
+    "cloudant": "^1.10.0-NOTICE",
+    "express": "^4.16.3",
+    "moment": "^2.22.1",
+    "node-datetime": "^2.0.6",
+    "promises": "^0.2.5",
+    "socket.io": "^2.1.0",
+    "unirest": "^0.5.1",
+    "watson-developer-cloud": "^3.4.0"
+  }
+}
