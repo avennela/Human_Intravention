@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Conversation Agent Demo User Interface</title>
+    <!-- load css library -->
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<style>
+    .button {
+        background-color: #fff;
+        /* Black */
+        border: none;
+        color: #2b3134;
+        padding: 9px 9px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 13px;
+        margin: 5px 2px;
+        cursor: pointer;
+        border-radius: 8px;
+    }
+</style>
+
+<body style="overflow:hidden">
+    <div class="wrapper">
+        <div class="container" style="top:45%">
+            <!-- left sidebar -->
+            <div class="left">
+                <ul class="people">
+                    <li class="logo">
+                        <center>
+                            <img src="miracle.png" alt="" height="50px" width="150px" />
+                        </center>
+                    </li>
+                </ul>
+                <div class="top">
+                    <input type="text" placeholder="Search" />
+                    <a href="javascript:;" class="search"></a>
+                </div>
+                <ul class="people" id="olo">
+
+                </ul>
+            </div>
+            <!-- right chat window -->
+            <div class="right">
+                <div class="top">
+                    <center><span><span class="name">Agent Conversation Panel</span></span>
+                    </center>
+                </div>
+
+                <div class="chat1" style="overflow:scroll; display: none;" data-chat="k">
+
+                </div>
+                <!--<div class="chat"  style="overflow-y:scroll;height:500px;width:500px;" data-chat="person2">
+                  <!--<div id="hell1" class="bubble you"></div>
+                  <div id="hell" class="bubble me"></div> -->
+                <!--</div>-->
+            </div>
+            <div class="write" style="display:none">
+                <form class="inputForm">
+                    <input id="m" class="m" autocomplete="off" name="SEND" />
+                    <a href="javascript:;" class="write-link send" id="send"></a>
+                    </br><br>
+                </form>
+            </div>
+
+            <div id='gt'></div>
+            <!-- end of right window -->
+        </div>
+    </div>
+    <!-- load js library -->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js'></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+    <script src="js/index.js"></script>
+    <script src="js/creation.js"></script>
+    <script>
+        /* function updateScrollbar() {
+                 
+                         $('.chat').mCustomScrollbar("update").mCustomScrollbar('scrollTo', '', {
+                             scrollInertia: 5,
+                             timeout: 0
+                         }); -->
+                     } */
+        var myVar;
+        var namedata;
+        var personName;
+        var socket = io();
+        var agentname = localStorage.getItem("name");
+        socket.on('checker', function(data) {
+            console.log("checker triggerd", data);
+            personName = data
+            console.log("checker triggerd", personName);
+        })
+        console.log("agentName is", agentname);
+
+
+        $('form').submit(function() {
+
+            var inpu = [];
+            inpu = $('#m').val();
+
+            $('.active-chat').append('<div class="bubble me">' + $('#m').val() + '</div>').animate({
+                scrollTop: 10000
+            }, 0)
+            console.log("personName", personName);
+            console.log("personName.length", personName.length);
+
+            var id = personName.substring(4, 20);
+            console.log("id", id);
+            socket.emit('chat message', {
+                "msg": inpu,
+                "fbId": id,
+                "agentname": agentname
+            });
+            $('#m').val('');
+            return false;
+
+        });
+
+        socket.on('notify', function() {
+
+
+            $("." + namedata + "1").remove();
+
+
+        })
+        socket.on('notify1', function(data) {
+            alert("Notify1 trigger")
+
+            $("." + namedata + "1").remove();
+
+
+        })
+        socket.on('connect', function() {
+            alert("Triggred");
+            socket.emit('agentcreate', {
+                "agent": agentname
+            }, function() {
+                console.log("agentcreate event Emitted")
+            });
+        });
+        socket.on('agentMsg', function(data) {
+            console.log("data is", data);
+            alert("agent message triggerd");
+            $('.' + data.fbId).append('<div class="bubble you">' + data.resData + '</div>').animate({
+                scrollTop: 10000
+            }, 0)
+
+        });
+
+        function endConv() {
+            deleteElement(personName);
+            var fbId = personName.substring(4, 20);
+            socket.emit('endConv', {
+                "botStatus": true,
+                "fbId": fbId,
+                "agentName": agentname
+            });
+
+        }
+
+        function timefunction() {
+            console.log("PersonName in timefunction", personName);
+            var fb = personName.substring(4, 20);
+            myVar = setTimeout(function() {
+                socket.emit('disablenotification', {
+                    "fbId": fb
+                })
+            }, 30000);
+        }
+
+        function myStopFunction() {
+            clearTimeout(myVar);
+        }
+        socket.on('fbMsg', function(msg1) {
+            $('#m').val('');
+            console.log(msg1);
+            $('.chat').append('<div class="bubble you">' + msg1 + '</div>').animate({
+                scrollTop: 10000
+            }, 0)
+            //updateScrollbar();  
+            return false;
+        });
+
+        function connectagent(msg1) {
+            myStopFunction();
+            var fbId = personName.substring(4, 20);
+            socket.emit('disnotification', agentname)
+
+
+            createElement(msg1.count, function(data1) {
+
+
+                for (var i = 0; i < msg1.data.length; i++) {
+                    console.log("element created")
+                    console.log("data", msg1.data);
+                    $('.' + namedata + '[data-chat = ' + data1 + ']').append('<div class="bubble you">' + msg1.data[i].user + '</div>').animate({
+                        scrollTop: 10000
+                    }, 0)
+                    $('.' + namedata + '[data-chat = ' + data1 + ']').append('<div class="bubble me">' + msg1.data[i].bot + '</div>').animate({
+                        scrollTop: 10000
+                    }, 0)
+                }
+
+            });
+
+
+        }
+        socket.on('dataSent', function(body) {
+            alert("datasent")
+            timefunction();
+            namedata = body.fbId;
+            console.log(namedata);
+            createDiv(body.count, body);
+        });
+
+
+
+        function Rfunction1(obj) {
+            alert(obj);
+            socket.emit('chat message', obj);
+
+            document.getElementById('iPhone').style.display = "none";
+
+            document.getElementById('Surface').style.display = "none";
+
+            document.getElementById('Apple MacBook').style.display = "none";
+        }
+    </script>
+</body>
+
+</html>
